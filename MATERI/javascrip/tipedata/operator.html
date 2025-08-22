@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>operator</h1>
+    <script>
+        var a = 2
+        var b = 3
+        var c = 1
+        // unary operator
+        var d = 1
+        d++
+
+
+
+
+        document.writeln(a + b)
+        document.writeln(a - b)
+        document.writeln(a * b)
+        document.writeln(c / a)
+        document.writeln(b ** a)
+        document.writeln(b % a)
+        document.writeln(d)
+
+        // operator perbandingan
+        let hasil = 5 > 3
+        document.writeln(hasil)
+        hasil = 5 < 3
+        document.writeln(hasil)
+        
+
+      document.writeln("</br>")
+        // operator logika
+        const nilaiUjian = 90
+        const nilaiAbsen = 90
+        const LuLusUjian = nilaiUjian > 70
+        const LuLusAbsensi = nilaiAbsen > 70
+        
+        const LuLus = LuLusAbsensi && LuLusUjian
+        const minimal = LuLusAbsensi || LuLusUjian
+        document.writeln(LuLus)
+        document.writeln(minimal)
+
+
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>selector css</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>selector css</h1>
+    <p>selector css ada enam macam</p>
+    <ol>
+        <li>selector tag</li>
+        <li>selector class</li>
+        <li>selector id</li>
+        <li>selector atribut</li>
+        <li>selector universitas</li>
+        <li>selector pseudo</li>
+    </ol>
+    <hr>
+
+    <h2>praktek</h2>
+    <h3>tag</h3>
+    <p>hello wolrd</p>
+    <div>hello wolrd</div>
+    <p>hello wolrd</p>
+    <div>hello wolrd</div>
+
+    <h3>class</h3>
+    <div class="rey-sha">hello rey</div>
+    <div>hello rey</div>
+
+    <h3>id</h3>
+    <div id="paragraf">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates quaerat eaque assumenda! Ex, similique excepturi, quas adipisci exercitationem atque minus unde aspernatur, vitae totam culpa velit ipsa temporibus aliquid labore!</div>
+
+    <h3>atribut</h3>
+    <input type="text" placeholder="masukan nama anomali anda ...">
+
+    <h3>universal</h3>
+<p>selector untuk semua</p>
+
+<h3>pseudo</h3>
+<a href="https//instagram.com/imaqilmj">klik disini tod!!!</a>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animasi Anomali CSS</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1a1a2e; /* Latar belakang gelap untuk kontras */
+            overflow: hidden;
+            font-family: 'Consolas', monospace; /* Font teknis */
+            color: #e0e0e0;
+        }
+
+        .anomaly-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); /* Cahaya samar */
+            overflow: hidden; /* Penting untuk efek glitch */
+        }
+
+        .anomaly-text {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff; /* Efek neon */
+            color: #00ffff; /* Warna cyan */
+            animation: textGlitch 2s linear infinite alternate; /* Animasi teks */
+            z-index: 2;
+        }
+
+        .anomaly-glitch-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Agar tidak menghalangi interaksi jika ada */
+            animation: glitchEffect 1s steps(10, end) infinite; /* Efek glitch cepat */
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(255,255,255,0.1) 50%);
+            background-size: 100% 5px; /* Garis horizontal tipis */
+            filter: blur(1px) contrast(1.5); /* Blur dan kontras */
+            opacity: 0.3;
+            z-index: 3;
+        }
+
+        .anomaly-distortion-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 0, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%);
+            mix-blend-mode: overlay; /* Campur warna */
+            animation: distortionWave 3s ease-in-out infinite alternate; /* Gelombang distorsi */
+            z-index: 1;
+        }
+
+        /* Keyframes untuk Efek Glitch pada Teks */
+        @keyframes textGlitch {
+            0% {
+                transform: translate(0, 0);
+                text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+            }
+            20% {
+                transform: translate(-2px, 2px);
+                text-shadow: 0 0 3px #f0f, 0 0 8px #f0f;
+            }
+            40% {
+                transform: translate(3px, -3px);
+                text-shadow: 0 0 7px #0f0, 0 0 12px #0f0;
+            }
+            60% {
+                transform: translate(-1px, 1px);
+                text-shadow: 0 0 6px #0ff, 0 0 11px #0ff;
+            }
+            80% {
+                transform: translate(2px, -2px);
+                text-shadow: 0 0 4px #ff0, 0 0 9px #ff0;
+            }
+            100% {
+                transform: translate(0, 0);
+                text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+            }
+        }
+
+        /* Keyframes untuk Lapisan Glitch Horizontal */
+        @keyframes glitchEffect {
+            0% {
+                transform: translateY(0);
+                background-position: 0 0;
+            }
+            10% {
+                transform: translateY(-5px);
+                background-position: 0 10px;
+            }
+            20% {
+                transform: translateY(5px);
+                background-position: 0 0;
+            }
+            30% {
+                transform: translateY(-3px);
+                background-position: 0 5px;
+            }
+            40% {
+                transform: translateY(3px);
+                background-position: 0 15px;
+            }
+            50% {
+                transform: translateY(-7px);
+                background-position: 0 0;
+            }
+            60% {
+                transform: translateY(7px);
+                background-position: 0 10px;
+            }
+            70% {
+                transform: translateY(-2px);
+                background-position: 0 5px;
+            }
+            80% {
+                transform: translateY(2px);
+                background-position: 0 0;
+            }
+            90% {
+                transform: translateY(-4px);
+                background-position: 0 10px;
+            }
+            100% {
+                transform: translateY(0);
+                background-position: 0 0;
+            }
+        }
+
+        /* Keyframes untuk Gelombang Distorsi */
+        @keyframes distortionWave {
+            0% {
+                transform: scale(0.8) rotate(0deg);
+                opacity: 0.5;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 1;
+                filter: hue-rotate(360deg);
+            }
+            100% {
+                transform: scale(0.8) rotate(360deg);
+                opacity: 0.5;
+                filter: hue-rotate(0deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="anomaly-container">
+        <div class="anomaly-glitch-layer"></div>
+        <div class="anomaly-distortion-wave"></div>
+        <div class="anomaly-text">ANOMALI</div>
+    </div>
+</body>
+</html>
+
+
+
+<div class="kotak"> bergerak</div>
+</body>
+</html>

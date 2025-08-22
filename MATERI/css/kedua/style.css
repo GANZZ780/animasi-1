@@ -1,0 +1,55 @@
+  */color/
+.nama-warna {
+  color: blue;
+}
+
+.heksadecimal {
+   color: antiquewhite;
+}
+
+.rbg {
+  color:  blue;
+}
+
+
+.gradient {
+  color: aliceblue;
+  background: #020024;
+background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+}
+
+/*bacgroun*/
+
+.bg-color {
+  color: blue;
+
+} 
+
+
+.bg-color {
+  background-image: url(a.jpg);
+}
+
+
+/* text formatting*/
+.tex-formatting {
+  background-color: blue;
+}
+
+.kanan{
+  text-align: right;
+}
+
+.kiri {
+  text-align: left;
+}
+
+.tengah {
+  text-align: center;
+}
+
+.none {
+  text-decoration: #020024;
+
+}
+

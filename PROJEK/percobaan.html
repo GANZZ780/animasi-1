@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pesawat SVG Mengelilingi Dunia</title>
+<style>
+  body{
+    background: linear-gradient(to bottom, #1e3c72, #2a5298);
+    display:flex;justify-content:center;align-items:center;
+    height:100vh;overflow:hidden;margin:0
+  }
+  .container{position:relative;width:320px;height:320px}
+
+  /* Globe */
+  .globe{
+    width:200px;height:200px;border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #4facfe, #0052d4);
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    box-shadow:0 0 50px rgba(0,0,0,.4), inset -10px -20px 40px rgba(0,0,0,.25);
+  }
+
+  /* Jalur orbit terlihat (statis) */
+  .orbit-path{
+    position:absolute;inset:0;width:320px;height:320px;border-radius:50%;
+    border:2px dashed rgba(255,255,255,.85);
+    box-shadow:0 0 12px rgba(255,255,255,.35);
+    transform: rotateX(18deg);
+    pointer-events:none;
+  }
+
+  /* Orbit yang memutar isinya */
+  .orbit{
+    position:absolute;inset:0;width:320px;height:320px;border-radius:50%;
+    animation: rotateOrbit 6s linear infinite;
+  }
+
+  /* Pesawat SVG */
+  .plane{
+    position:absolute;top:-24px;left:50%;
+    width:48px;height:48px;
+    transform:translateX(-50%) rotate(0deg);
+    animation: planeRotate 6s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,.9));
+  }
+
+  /* (opsional) titik trail */
+  .trail{
+    position:absolute;top:-3px;left:50%;
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,.55);
+    transform:translateX(-50%);
+    box-shadow:
+      0 0 10px rgba(255,255,255,.65),
+      0 0 20px rgba(173,216,230,.45);
+  }
+
+  @keyframes rotateOrbit{to{transform:rotate(360deg)}}
+  @keyframes planeRotate{to{transform:translateX(-50%) rotate(360deg)}}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="globe"></div>
+    <div class="orbit-path"></div>
+
+    <div class="orbit">
+      <!-- PESAWAT: SVG inline -->
+      <svg class="plane" viewBox="0 0 64 64" aria-label="Airplane">
+        <!-- glow halus -->
+        <defs>
+          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- badan pesawat -->
+        <path d="M7 31 L36 31 L56 22 C58 21 60 23 59 25 L50 32 L59 39 C60 41 58 43 56 42 L36 33 L7 33 Z"
+              fill="#ffffff" filter="url(#softGlow)"/>
+        <!-- kokpit -->
+        <path d="M35 29 C38 27 42 26 45 26 L45 38 C42 38 38 37 35 35 Z" fill="#dce9ff"/>
+        <!-- sayap depan -->
+        <path d="M24 28 L33 28 L26 20 C24.8 18.6 23 19.6 23.4 21.2 Z"
+              fill="#ffffff"/>
+        <path d="M24 36 L33 36 L26 44 C24.8 45.4 23 44.4 23.4 42.8 Z"
+              fill="#ffffff"/>
+        <!-- ekor vertikal -->
+        <path d="M10 29 L14 25 L14 39 L10 35 Z" fill="#ffffff"/>
+        <!-- garis detail tipis -->
+        <line x1="15" y1="32" x2="36" y2="32" stroke="#cfe3ff" stroke-width="1"/>
+      </svg>
+
+      <!-- beberapa titik trail (opsional) -->
+      <div class="trail" style="transform:translateX(-50%) rotate(60deg) translateY(-160px)"></div>
+      <div class="trail" style="transform:translateX(-50%) rotate(145deg) translateY(-160px)"></div>
+      <div class="trail" style="transform:translateX(-50%) rotate(230deg) translateY(-160px)"></div>
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Animasi Hijrah Interaktif — 3D Desert</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --tilt-x: 0deg;
+      --tilt-y: 0deg;
+      --cam-z: 600px;  /* jarak kamera */
+    }
+    body{ background: linear-gradient(#eaf5ff, #ffffff); }
+
+    /* ===== 3D STAGE ===== */
+    .stage{ perspective: var(--cam-z); perspective-origin: 50% 40%; }
+    .world{ transform-style: preserve-3d; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transition: transform .3s ease; }
+
+    /* ===== MAP (meja 3D) ===== */
+    .table{ position: relative; width: 100%; height: 520px; border-radius: 20px; overflow: visible; transform-style: preserve-3d; }
+    .table-top{ /* permukaan peta */
+      position: absolute; inset: 0; border-radius: 20px; overflow: hidden;
+      background: url('https://i.ibb.co/hspbPvW/map-hijrah.png') no-repeat center/cover, linear-gradient(180deg,#f2e9da,#e9dcc2);
+      box-shadow: 0 20px 40px rgba(0,0,0,.18), inset 0 0 0 4px #38bdf8;
+      transform: translateZ(0px);
+    }
+    /* Sisi meja (memberi volume 3D) */
+    .table-side{ position:absolute; left:0; right:0; bottom:-24px; height:24px; border-radius: 0 0 20px 20px;
+      background: linear-gradient(#d1d5db,#9ca3af); box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transform: translateZ(-24px);
+    }
+
+    /* ===== LAYERS with depth ===== */
+    .layer{ position:absolute; inset:0; transform-style: preserve-3d; pointer-events: none; }
+
+    /* Dunes (pasir) sebagai card lengkung, tiap layer punya kedalaman */
+    .dune{ position:absolute; left:-20%; width:160%; border-radius: 50% 50% 0 0 / 70% 70% 0 0; filter: blur(.2px); }
+    .dune.d1{ bottom:-2%; height:26%; background: linear-gradient(#eddba6,#dcc389); transform: translateZ(-120px) scale(1.1); animation: dune-move 48s linear infinite; }
+    .dune.d2{ bottom:-1%; height:20%; background: linear-gradient(#e7d298,#d3bd80); transform: translateZ(-200px) scale(1.18); animation: dune-move 60s linear infinite reverse; opacity:.95; }
+    .dune.d3{ bottom: 0;  height:16%; background: linear-gradient(#ddc986,#c7af6e); transform: translateZ(-260px) scale(1.26); animation: dune-move 72s linear infinite; opacity:.85; }
+    @keyframes dune-move{ 0%{ transform: translateZ(var(--z, -120px)) scale(var(--s,1.1)) translateX(0);} 100%{ transform: translateZ(var(--z, -120px)) scale(var(--s,1.1)) translateX(-12%);} }
+
+    /* Pohon kurma dalam 3D */
+    .palm{ position:absolute; transform-origin: bottom center; filter: drop-shadow(0 2px 2px rgba(0,0,0,.15)); animation: sway 3.8s ease-in-out infinite alternate; }
+    .palm.fast{ animation-duration: 2.6s; }
+    .palm.slow{ animation-duration: 5s; }
+    .palm.z-50{ transform: translateZ(50px); }
+    .palm.z20{ transform: translateZ(20px); }
+    .palm.z-40{ transform: translateZ(-40px); }
+    @keyframes sway{ from{ transform: translateZ(var(--pz,0)) rotate(-3deg) } to{ transform: translateZ(var(--pz,0)) rotate(3deg) } }
+
+    /* Butiran pasir lewat depan kamera (kedalaman +) */
+    .sand{ position:absolute; width:6px; height:2px; border-radius: 2px; background: rgba(201,170,110,.75); top: var(--y,65%); left:-10%; opacity:.85; box-shadow: 8px 0 0 rgba(201,170,110,.5), 16px 0 0 rgba(201,170,110,.35); transform: translateZ(120px); animation: sand-blow var(--dur,9s) linear infinite; }
+    @keyframes sand-blow{ 0%{ transform: translateZ(120px) translateX(0) translateY(0); opacity:0 } 10%{ opacity:.9 } 100%{ transform: translateZ(120px) translateX(120vw) translateY(calc(-10px - 8vh)); opacity:.1 } }
+
+    /* Hotspot 3D (naik sedikit) */
+    .hotspot{ pointer-events: auto; transform: translateZ(30px); }
+    .ripple:after{ content:""; position:absolute; inset:-8px; border-radius:9999px; border:2px solid rgba(59,130,246,.35); animation: ping 1.5s cubic-bezier(0,0,.2,1) infinite; }
+    @keyframes ping{ 0%{ transform: scale(1); opacity:1 } 75%,100%{ transform: scale(1.8); opacity:0 } }
+
+    /* Unta 3D + bayangan */
+    .camel{ font-size: 2.6rem; position:absolute; top: 70%; left: 15%; transform: translateZ(90px); animation: travel 18s linear infinite; z-index: 30; }
+    .camel-shadow{ position:absolute; width: 3rem; height: 1rem; background: radial-gradient(ellipse, rgba(0,0,0,.25), rgba(0,0,0,0)); border-radius: 999px; top: calc(70% + 22px); left: 15%; transform: translateZ(40px) scale(1); animation: travelShadow 18s linear infinite; filter: blur(2px); }
+    .paused .camel, .paused .camel-shadow{ animation-play-state: paused; }
+
+    @keyframes travel{
+      0%   { left:15%; top:70%; transform: translateZ(90px) rotate(0deg) }
+      15%  { left:26%; top:63%; transform: translateZ(90px) rotate(-8deg) }
+      30%  { left:38%; top:57%; transform: translateZ(90px) rotate(-6deg) }
+      45%  { left:50%; top:50%; transform: translateZ(90px) rotate(-5deg) }
+      60%  { left:62%; top:47%; transform: translateZ(90px) rotate(-4deg) }
+      75%  { left:73%; top:44%; transform: translateZ(90px) rotate(-3deg) }
+      100% { left:85%; top:40%; transform: translateZ(90px) rotate(-2deg) }
+    }
+    @keyframes travelShadow{
+      0%   { left:15%; top:calc(70% + 22px); transform: translateZ(40px) scale(1) }
+      15%  { left:26%; top:calc(63% + 22px); transform: translateZ(40px) scale(1.02) }
+      30%  { left:38%; top:calc(57% + 22px); transform: translateZ(40px) scale(1.03) }
+      45%  { left:50%; top:calc(50% + 22px); transform: translateZ(40px) scale(1.04) }
+      60%  { left:62%; top:calc(47% + 22px); transform: translateZ(40px) scale(1.05) }
+      75%  { left:73%; top:calc(44% + 22px); transform: translateZ(40px) scale(1.06) }
+      100% { left:85%; top:calc(40% + 22px); transform: translateZ(40px) scale(1.07) }
+    }
+
+    /* Sun (bola) dan awan 3D */
+    .sun{ position:absolute; width:120px; height:120px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #fff7c2, #ffd266 60%, #fbbf24 80%); top: -30px; right: -30px; transform: translateZ(-280px); box-shadow: 0 0 80px rgba(251,191,36,.65); }
+    .cloud{ position:absolute; width:160px; height:60px; top:50px; left:-10%; transform: translateZ(-200px); filter: drop-shadow(0 4px 10px rgba(0,0,0,.08)); animation: cloud-move 60s linear infinite; }
+    .cloud:before, .cloud:after{ content:""; position:absolute; background: #ffffff; border-radius: 999px; }
+    .cloud:before{ width:100px; height:60px; left:20px; top:10px; }
+    .cloud:after{ width:70px; height:40px; left:80px; top:0; }
+    @keyframes cloud-move{ 0%{ transform: translateZ(-200px) translateX(0) } 100%{ transform: translateZ(-200px) translateX(120%) } }
+
+    /* Accessibility: reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .world, .dune, .camel, .camel-shadow, .sand, .cloud{ animation: none !important; }
+      .world{ transition: none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800">
+  <header class="max-w-5xl mx-auto px-4 pt-8 pb-4">
+    <h1 class="text-3xl font-extrabold text-sky-700">🌍 Perjalanan Hijrah Nabi ﷺ — Interaktif 3D</h1>
+    <p class="mt-2 text-slate-600">Klik ikon unta atau titik rute untuk membaca kisah per tahap. Seret kursor/gerakkan ponsel untuk efek 3D.</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+    <div class="stage">
+      <div id="world" class="world">
+        <div id="table" class="table">
+          <div class="table-top"></div>
+          <div class="table-side"></div>
+
+          <!-- Sun & Clouds (back) -->
+          <div class="sun"></div>
+          <div class="cloud"></div>
+
+          <!-- FX Desert Layers (depth) -->
+          <div class="layer">
+            <div class="dune d1" style="--z:-120px; --s:1.1"></div>
+            <div class="dune d2" style="--z:-200px; --s:1.18"></div>
+            <div class="dune d3" style="--z:-260px; --s:1.26"></div>
+
+            <!-- Sand particles (front) -->
+            <span class="sand" style="--y:68%; --dur:8.6s"></span>
+            <span class="sand" style="--y:70%; --dur:9.2s"></span>
+            <span class="sand" style="--y:66%; --dur:7.8s"></span>
+            <span class="sand" style="--y:72%; --dur:8.8s"></span>
+            <span class="sand" style="--y:64%; --dur:7.2s"></span>
+            <span class="sand" style="--y:69%; --dur:8.1s"></span>
+            <span class="sand" style="--y:71%; --dur:9.4s"></span>
+          </div>
+
+          <!-- Hotspots (raised) -->
+          <button data-story="makkah" class="hotspot ripple absolute left-[12%] top-[75%] -translate-x-1/2 -translate-y-1/2 focus:outline-none" aria-label="Buka cerita: Makkah">
+            <span class="block w-4 h-4 bg-red-600 rounded-full ring-4 ring-red-200"></span>
+          </button>
+          <p class="absolute left-[12%] top-[79%] -translate-x-1/2 text-xs font-bold text-red-600" style="transform: translateZ(30px)">Makkah</p>
+
+          <button data-story="tsaur" class="hotspot absolute left-[26%] top-[63%] -translate-x-1/2 -translate-y-1/2 focus:outline-none" aria-label="Buka cerita: Gua Tsaur">
+            <span class="block w-3.5 h-3.5 bg-amber-500 rounded-full ring-4 ring-amber-200"></span>
+          </button>
+
+          <button data-story="selatan" class="hotspot absolute left-[38%] top-[57%] -translate-x-1/2 -translate-y-1/2 focus:outline-none" aria-label="Buka cerita: Menyusuri selatan">
+            <span class="block w-3.5 h-3.5 bg-blue-600 rounded-full ring-4 ring-blue-200"></span>
+          </button>
+
+          <button data-story="quba" class="hotspot absolute left-[73%] top-[44%] -translate-x-1/2 -translate-y-1/2 focus:outline-none" aria-label="Buka cerita: Masjid Quba">
+            <span class="block w-3.5 h-3.5 bg-emerald-600 rounded-full ring-4 ring-emerald-200"></span>
+          </button>
+
+          <button data-story="madinah" class="hotspot ripple absolute left-[87%] top-[38%] -translate-x-1/2 -translate-y-1/2 focus:outline-none" aria-label="Buka cerita: Madinah">
+            <span class="block w-4 h-4 bg-green-600 rounded-full"></span>
+          </button>
+          <p class="absolute left-[87%] top-[34%] -translate-x-1/2 text-xs font-bold text-green-700" style="transform: translateZ(30px)">Madinah</p>
+
+          <!-- Camel + shadow -->
+          <button id="camel" class="camel" aria-label="Unta bergerak (klik untuk pause/play atau buka cerita ringkas)">🐪</button>
+          <div class="camel-shadow"></div>
+
+          <!-- Controls Panel (float above) -->
+          <div class="absolute left-4 top-4 flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-2 rounded-xl shadow z-40" style="transform: translateZ(140px)">
+            <button id="toggle" class="px-3 py-1.5 text-sm rounded-lg bg-sky-600 text-white hover:bg-sky-700">⏯️ Play/Pause</button>
+            <button id="open-all" class="px-3 py-1.5 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">📖 Buka Cerita (Urut)</button>
+            <button id="reset-tilt" class="px-3 py-1.5 text-sm rounded-lg bg-slate-700 text-white hover:bg-slate-800">🎯 Reset Tilt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-4 text-sm text-slate-600">
+      <span class="inline-block w-3 h-3 bg-red-600 rounded-full align-middle mr-1"></span> Makkah
+      <span class="inline-block w-3 h-3 bg-amber-500 rounded-full align-middle mx-3"></span> Gua Tsaur
+      <span class="inline-block w-3 h-3 bg-blue-600 rounded-full align-middle mr-1"></span> Rute Selatan
+      <span class="inline-block w-3 h-3 bg-emerald-600 rounded-full align-middle mx-3"></span> Quba’
+      <span class="inline-block w-3 h-3 bg-green-600 rounded-full align-middle mr-1"></span> Madinah
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative mx-auto mt-24 max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b flex items-center justify-between">
+        <h2 id="modalTitle" class="text-xl font-bold text-sky-700">Cerita Hijrah</h2>
+        <div class="flex gap-2">
+          <button id="prev" class="px-3 py-1.5 text-sm rounded-lg bg-slate-100 hover:bg-slate-200">← Sebelumnya</button>
+          <button id="next" class="px-3 py-1.5 text-sm rounded-lg bg-slate-100 hover:bg-slate-200">Berikutnya →</button>
+          <button id="close" class="ml-2 px-3 py-1.5 text-sm rounded-lg bg-rose-600 text-white hover:bg-rose-700">Tutup</button>
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 id="modalSection" class="font-semibold text-lg"></h3>
+        <p id="modalBody" class="mt-2 leading-relaxed"></p>
+        <div id="modalRef" class="mt-4 text-xs text-slate-500"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="max-w-5xl mx-auto px-4 py-8 text-xs text-slate-500">
+    Sumber ringkasan: kitab-kitab sirah (Ibnu Hisyam, Ar-Raheeq Al-Makhtum). Gunakan sebagai pengantar; rujuk kitab asli untuk detail.
+  </footer>
+
+  <script>
+    // --- Data cerita ---
+    const STORIES = [
+      { key:"makkah",  title:"Makkah — Awal Perjuangan",
+        text:`Nabi Muhammad ﷺ berdakwah di Makkah. Penindasan meningkat; Baiat 'Aqabah membuka jalan hijrah.`,
+        ref:"Ibnu Hisyam; Ar-Raheeq Al-Makhtum" },
+      { key:"tsaur",   title:"Gua Tsaur — Persembunyian",
+        text:`Beliau dan Abu Bakar (ᵣᵃ) bersembunyi tiga malam. Allah menjaga; upaya pengejar gagal.`,
+        ref:"QS. At-Taubah: 40" },
+      { key:"selatan", title:"Rute Selatan — Strategi",
+        text:`Tidak langsung ke utara; menyusuri selatan terlebih dulu. Dipandu 'Abdullah bin Uraiqith.`,
+        ref:"Ar-Raheeq Al-Makhtum" },
+      { key:"quba",    title:"Quba’ — Masjid Pertama",
+        text:`Di Quba’ dibangun masjid pertama; beberapa hari kemudian menuju pusat Yatsrib.`,
+        ref:"Keutamaan shalat di Masjid Quba’" },
+      { key:"madinah", title:"Madinah — Piagam & Ukhuwah",
+        text:`Disambut Anshar, mempersaudarakan Muhajirin-Anshar, membangun Masjid Nabawi, menyusun Piagam Madinah.`,
+        ref:"Sumber-sumber sirah klasik" },
+    ];
+    const keyIndex = Object.fromEntries(STORIES.map((s,i)=>[s.key,i]));
+
+    // --- Elemen ---
+    const world = document.getElementById('world');
+    const table = document.getElementById('table');
+    const camel = document.getElementById('camel');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSection = document.getElementById('modalSection');
+    const modalBody = document.getElementById('modalBody');
+    const modalRef = document.getElementById('modalRef');
+    const btnPrev = document.getElementById('prev');
+    const btnNext = document.getElementById('next');
+    const btnClose = document.getElementById('close');
+    const toggle = document.getElementById('toggle');
+    const openAll = document.getElementById('open-all');
+    const resetTilt = document.getElementById('reset-tilt');
+
+    let current = 0;
+
+    function openModal(index){
+      current = Math.max(0, Math.min(STORIES.length-1, index));
+      const s = STORIES[current];
+      modalTitle.textContent = 'Cerita Hijrah';
+      modalSection.textContent = s.title;
+      modalBody.textContent = s.text;
+      modalRef.textContent = s.ref ? 'Rujukan: ' + s.ref : '';
+      modal.classList.remove('hidden');
+      table.classList.add('paused');
+    }
+    function closeModal(){ modal.classList.add('hidden'); table.classList.remove('paused'); }
+
+    // Klik unta: buka cerita sesuai progress; Alt+klik: toggle pause
+    camel.addEventListener('click', (ev)=>{
+      if (ev.altKey){ table.classList.toggle('paused'); return; }
+      const duration = 18000; const t = (Date.now() % duration) / duration;
+      const idx = t < 0.2 ? 0 : t < 0.35 ? 1 : t < 0.6 ? 2 : t < 0.85 ? 3 : 4;
+      openModal(idx);
+    });
+
+    toggle.addEventListener('click', ()=> table.classList.toggle('paused'));
+    openAll.addEventListener('click', ()=> openModal(0));
+    btnPrev.addEventListener('click', ()=> openModal(current-1));
+    btnNext.addEventListener('click', ()=> openModal(current+1));
+    btnClose.addEventListener('click', closeModal);
+
+    document.querySelectorAll('[data-story]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openModal(keyIndex[btn.dataset.story] ?? 0));
+    });
+
+    // ===== 3D Tilt: mouse & gyroscope =====
+    let targetX = 0, targetY = 0; // target tilt angles
+    function applyTilt(){
+      // Smooth lerp untuk rasa halus
+      const currentStyle = getComputedStyle(document.documentElement);
+      const curX = parseFloat(currentStyle.getPropertyValue('--tilt-x')) || 0;
+      const curY = parseFloat(currentStyle.getPropertyValue('--tilt-y')) || 0;
+      const toX = curX + (targetX - curX) * 0.1;
+      const toY = curY + (targetY - curY) * 0.1;
+      document.documentElement.style.setProperty('--tilt-x', toX + 'deg');
+      document.documentElement.style.setProperty('--tilt-y', toY + 'deg');
+      requestAnimationFrame(applyTilt);
+    }
+    applyTilt();
+
+    table.addEventListener('mousemove', (e)=>{
+      const rect = table.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;  // 0..1
+      const py = (e.clientY - rect.top) / rect.height; // 0..1
+      const maxX = 10;  // derajat
+      const maxY = 12;
+      targetX = (py - .5) * -maxX; // rotateX terbalik agar terasa natural
+      targetY = (px - .5) *  maxY; // rotateY
+    });
+    table.addEventListener('mouseleave', ()=>{ targetX = 0; targetY = 0; });
+
+    // Gyroscope (mobile)
+    window.addEventListener('deviceorientation', (e)=>{
+      if(!e.beta && !e.gamma) return; // no data
+      const maxX = 10, maxY = 12;
+      targetX = Math.max(-maxX, Math.min(maxX, e.beta/6));
+      targetY = Math.max(-maxY, Math.min(maxY, e.gamma/6));
+    });
+
+    resetTilt.addEventListener('click', ()=>{ targetX = 0; targetY = 0; });
+  </script>
+</body>
+</html>
+
+

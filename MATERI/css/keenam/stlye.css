@@ -1,0 +1,28 @@
+.container {
+    background-color: blue;
+    display: flex;
+    flex-direction: row;
+    height: 500px;
+    align-items:center ;
+    gap: 20px;
+    flex-wrap: wrap;
+ 
+}
+/* flex-direction untuk mengatur arah */
+/* justify untuk mengatur posisi vertikal */
+/* align-items mengatur posisi sesuai flex-direction*/
+/* gab untuk mengatur jarak*/
+/* wrap untuk mengatur kalau item tidak muat di satu baris */
+ .item {
+    flex: 1 1 100px;
+    align-self: center;
+    order: 1;
+    width: 100px;
+    height: 100px;
+    color: blue;
+    text-align: center;
+    line-height: 100px;
+    background-color: aqua;
+    box-shadow: 0 0 10px red;
+    margin: 10px;
+ }

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kompas Kiblat 3D Real-time</title>
+<style>
+  :root{
+    --size: 320px;
+    --rim: 8px;
+    --needle-w: 8px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; height:100vh; display:grid; place-items:center;
+    background: radial-gradient(circle at 50% 35%, #0f2027, #203a43 60%, #2c5364 100%);
+    color:#fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .wrap{display:flex; flex-direction:column; gap:14px; align-items:center}
+  .actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  button{
+    background:#10b981; border:none; color:#041b1f; font-weight:700; padding:10px 14px;
+    border-radius:12px; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.25);
+  }
+  button.secondary{background:#e5e7eb; color:#0f172a}
+  .hint{opacity:.85; font-size:.9rem; text-align:center; max-width:520px; line-height:1.3}
+  .status{font-size:.9rem; opacity:.9; text-align:center}
+
+  /* Kompas 3D */
+  .kompas{
+    width:var(--size); height:var(--size); border-radius:50%;
+    background: radial-gradient(circle at 50% 55%, #1a1a1a 0%, #0d0d0f 60%, #000 100%);
+    border: var(--rim) solid #e5e7eb;
+    position:relative; display:grid; place-items:center;
+    box-shadow:
+      inset 0 0 30px rgba(255,255,255,.06),
+      0 18px 40px rgba(0,0,0,.55);
+    transform-style:preserve-3d;
+    animation: tilt 6s ease-in-out infinite;
+  }
+  @keyframes tilt{
+    0%   { transform: rotateX(10deg) rotateY(10deg); }
+    25%  { transform: rotateX(-10deg) rotateY(12deg); }
+    50%  { transform: rotateX(-8deg) rotateY(-10deg); }
+    75%  { transform: rotateX(12deg) rotateY(-8deg); }
+    100% { transform: rotateX(10deg) rotateY(10deg); }
+  }
+
+  /* Tanda derajat */
+  .ticks{
+    position:absolute; inset: calc(var(--rim) + 6px);
+    border-radius:50%;
+  }
+  .ticks span{
+    position:absolute; left:50%; top:0; transform-origin: center calc((var(--size)/2) - 22px);
+    width:2px; height:10px; background:#9ca3af; opacity:.6;
+  }
+  .ticks span.major{height:16px; background:#fff; opacity:.9}
+  .label{
+    position:absolute; font-weight:800; text-shadow:0 2px 10px rgba(0,0,0,.6);
+    letter-spacing:1px;
+  }
+  .N{top:8px; left:50%; transform:translateX(-50%); font-size:20px}
+  .S{bottom:8px; left:50%; transform:translateX(-50%); font-size:20px}
+  .E{right:10px; top:50%; transform:translateY(-50%); font-size:20px}
+  .W{left:10px; top:50%; transform:translateY(-50%); font-size:20px}
+
+  /* Jarum kiblat (dinamis) – diputar via JS */
+  .needle-kiblat{
+    position:absolute; width: var(--needle-w); height: calc(var(--size)/2 - 36px);
+    background: linear-gradient(#16a34a, #22c55e);
+    box-shadow: 0 0 18px rgba(34,197,94,.7), 0 0 2px #16a34a inset;
+    border-radius: 6px; transform-origin: bottom center; z-index:3;
+    filter: drop-shadow(0 6px 6px rgba(0,0,0,.35));
+  }
+  .needle-kiblat::after{
+    content:""; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+    width:14px; height:14px; background:#d1fae5; border-radius:50%;
+    box-shadow:0 0 10px rgba(16,185,129,.9);
+  }
+
+  /* Jarum utara (opsional, menunjuk ke “atas layar” = relatif heading) */
+  .needle-north{
+    position:absolute; width: var(--needle-w); height: calc(var(--size)/2 - 36px);
+    background: linear-gradient(#ef4444, #f87171);
+    border-radius:6px; transform-origin: bottom center; z-index:2; opacity:.5;
+  }
+
+  /* Ka'bah di tengah – SVG */
+  .kabah{
+    position:absolute; width:66px; height:66px; border-radius:12px; overflow:hidden;
+    display:grid; place-items:center; background:#000; z-index:4;
+    box-shadow: 0 0 22px rgba(0,0,0,.55), 0 0 12px rgba(250,204,21,.35) inset;
+  }
+  .kabah svg{width:54px; height:54px}
+  .stripe{fill:#facc15}
+  .cube{fill:#0a0a0a}
+
+  /* Panel info */
+  .info{
+    display:flex; gap:16px; flex-wrap:wrap; justify-content:center; align-items:center;
+    font-size:.9rem; opacity:.95;
+  }
+  .badge{
+    background:rgba(255,255,255,.1); padding:6px 10px; border-radius:10px;
+    border:1px solid rgba(255,255,255,.15);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kompas" id="kompas">
+      <div class="ticks" id="ticks"></div>
+      <div class="label N">N</div>
+      <div class="label S">S</div>
+      <div class="label E">E</div>
+      <div class="label W">W</div>
+
+      <div class="needle-kiblat" id="needleQ"></div>
+      <div class="needle-north" id="needleN"></div>
+
+      <!-- Ka'bah -->
+      <div class="kabah" title="Ka'bah">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <rect class="cube" x="12" y="22" width="76" height="66" rx="8" />
+          <rect class="stripe" x="12" y="38" width="76" height="10" />
+          <rect class="stripe" x="12" y="56" width="76" height="6" opacity=".85"/>
+          <circle cx="50" cy="50" r="6" fill="#fde68a" opacity=".9"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnCompass">Aktifkan Kompas</button>
+      <button class="secondary" id="btnRecenter">Kalibrasi / Re-center</button>
+    </div>
+
+    <div class="info">
+      <div class="badge">Lokasi: <span id="loc">mencari…</span></div>
+      <div class="badge">Arah Kiblat: <span id="bearing">–</span>° dari Utara</div>
+      <div class="badge">Heading Perangkat: <span id="heading">–</span>°</div>
+      <div class="badge">Sudut Jarum: <span id="rel">–</span>°</div>
+    </div>
+
+    <div class="hint">
+      Tip: pegang HP mendatar (flat), jauhkan dari magnet/logam. Di iPhone, pastikan beri izin sensor.
+      Kalau tidak ada sensor, jarum tetap akan menunjukkan <em>arah kiblat relatif layar</em> saat kamu memutar perangkat.
+    </div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+<script>
+(() => {
+  // Koordinat Ka'bah (Masjidil Haram)
+  const KAABA = { lat: 21.422487, lon: 39.826206 };
+
+  // Elemen UI
+  const needleQ = document.getElementById('needleQ');
+  const needleN = document.getElementById('needleN');
+  const locEl   = document.getElementById('loc');
+  const bearingEl = document.getElementById('bearing');
+  const headingEl = document.getElementById('heading');
+  const relEl     = document.getElementById('rel');
+  const statusEl  = document.getElementById('status');
+  const btnCompass = document.getElementById('btnCompass');
+  const btnRecenter= document.getElementById('btnRecenter');
+
+  // Buat ticks derajat
+  const ticks = document.getElementById('ticks');
+  for(let d=0; d<360; d+=10){
+    const s = document.createElement('span');
+    s.style.transform = `translateX(-50%) rotate(${d}deg)`;
+    if(d%30===0) s.classList.add('major');
+    ticks.appendChild(s);
+  }
+
+  let user = { lat: -6.200000, lon: 106.816666 }; // default Jakarta sebagai fallback
+  let qiblaBearing = 295; // fallback kira-kira dari Jakarta
+  let heading = 0;        // heading perangkat (0 = menghadap utara)
+  let offset = 0;         // offset manual kalibrasi
+
+  // Util
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+  const norm  = d => (d % 360 + 360) % 360;
+
+  // Bearing awal (rumus geodesi – initial bearing)
+  function computeBearing(from, to){
+    const φ1 = toRad(from.lat), φ2 = toRad(to.lat);
+    const Δλ = toRad(to.lon - from.lon);
+    const y = Math.sin(Δλ)*Math.cos(φ2);
+    const x = Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+    return norm(toDeg(Math.atan2(y, x)));
+  }
+
+  function updateUI(){
+    // Sudut relatif jarum kiblat terhadap arah depan layar
+    const relative = norm(qiblaBearing - (heading + offset));
+    needleQ.style.transform = `rotate(${relative}deg)`;
+    // Jarum utara (opsional): tunjukkan 0° relatif layar
+    needleN.style.transform = `rotate(${norm(- (heading + offset))}deg)`;
+
+    bearingEl.textContent = qiblaBearing.toFixed(1);
+    headingEl.textContent = (norm(heading + offset)).toFixed(1);
+    relEl.textContent     = relative.toFixed(1);
+  }
+
+  // Geolocation
+  if ('geolocation' in navigator){
+    navigator.geolocation.watchPosition(pos=>{
+      user.lat = pos.coords.latitude;
+      user.lon = pos.coords.longitude;
+      qiblaBearing = computeBearing(user, KAABA);
+      locEl.textContent = `${user.lat.toFixed(5)}, ${user.lon.toFixed(5)}`;
+      statusEl.textContent = '';
+      updateUI();
+    }, err=>{
+      statusEl.textContent = 'Lokasi gagal: ' + err.message + ' — pakai lokasi default (Jakarta).';
+      qiblaBearing = computeBearing(user, KAABA);
+      updateUI();
+    }, { enableHighAccuracy:true, maximumAge:5000, timeout:10000 });
+  } else {
+    statusEl.textContent = 'Geolocation tidak didukung. Pakai lokasi default (Jakarta).';
+    qiblaBearing = computeBearing(user, KAABA);
+    updateUI();
+  }
+
+  // Device Orientation
+  async function enableOrientation(){
+    try{
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const resp = await DeviceOrientationEvent.requestPermission();
+        if (resp !== 'granted'){
+          statusEl.textContent = 'Izin sensor ditolak. Jarum akan tetap statis.';
+          return;
+        }
+      }
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      statusEl.textContent = 'Sensor kompas aktif.';
+    } catch(e){
+      statusEl.textContent = 'Gagal mengaktifkan sensor: ' + e.message;
+    }
+  }
+
+  function handleOrientation(ev){
+    let hdg = null;
+
+    // iOS Safari menyediakan webkitCompassHeading (0..360, searah jarum jam dari utara)
+    if (typeof ev.webkitCompassHeading === 'number') {
+      hdg = ev.webkitCompassHeading;
+    } else if (typeof ev.alpha === 'number') {
+      // Alpha: rotasi terhadap sumbu-Z (kadang relatif perangkat)
+      // Koreksi orientasi layar
+      const orientation = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+      let a = ev.alpha + orientation;
+      // Konversi ke heading kompas: 0=utara, cw+
+      hdg = norm(360 - a);
+    }
+
+    if (hdg !== null){
+      heading = hdg;
+      updateUI();
+    }
+  }
+
+  btnCompass.addEventListener('click', enableOrientation);
+  btnRecenter.addEventListener('click', ()=>{
+    // Jadikan arah perangkat saat ini sebagai "0" (re-center)
+    offset = norm(-(heading + offset));
+    updateUI();
+    statusEl.textContent = 'Kalibrasi offset diterapkan.';
+  });
+
+  // Auto-aktifkan kompas untuk browser yang tidak butuh gesture
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission !== 'function'){
+    window.addEventListener('deviceorientation', handleOrientation, true);
+  }
+
+  // Inisialisasi UI
+  qiblaBearing = computeBearing(user, KAABA);
+  updateUI();
+})();
+</script>
+</body>
+</html>
+

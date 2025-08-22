@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Futuristic Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f0f0f, #1f1f1f);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px #0ff;
+      position: relative;
+      width: 350px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      color: #0ff;
+      margin-bottom: 30px;
+    }
+
+    .input-box {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 10px 10px 10px 40px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #0ff;
+      color: #fff;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .input-box label {
+      position: absolute;
+      top: 10px;
+      left: 40px;
+      color: #aaa;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+
+    .input-box input:focus + label,
+    .input-box input:valid + label {
+      top: -10px;
+      font-size: 12px;
+      color: #0ff;
+    }
+
+    .input-box i {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0ff;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      color: #0ff;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: #0ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .login-btn:hover {
+      background: #00d9ff;
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    .glow {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: radial-gradient(circle, #0ff33a22 0%, transparent 80%);
+      animation: rotate 6s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="login-box">
+    <h2>Login Portal</h2>
+    <form>
+      <div class="input-box">
+        <i class="fas fa-user"></i>
+        <input type="text" required />
+        <label>Username</label>
+      </div>
+      <div class="input-box">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" required />
+        <label>Password</label>
+        <span class="toggle-password" onclick="togglePassword()">👁️</span>
+      </div>
+      <button type="submit" class="login-btn">LOGIN</button>
+    </form>
+  </div>
+
+  <!-- Font Awesome Icon -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+  <script>
+    function togglePassword() {
+      const password = document.getElementById("password");
+      if (password.type === "password") {
+        password.type = "text";
+      } else {
+        password.type = "password";
+      }
+    }
+  </script>
+</body>
+</html>
